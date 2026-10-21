@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Clock-In Payload Sender</title>
+</head>
+<body>
+  <h1>Clock in / out</h1>
+  <p>Clock-in payload sent to <code>POST /clock-in</code>, clock-out to <code>POST /clock-out</code>:</p>
+  <br>
+  <button id="clockInBtn">Send clock-in</button>
+  <button id="clockOutBtn">Send clock-out</button>
+  <br><br>
+  <button id="breakStartBtn">Go on break (15 min)</button>
+  <button id="breakEndBtn">Back from break</button>
+  <br><br>
+  <button id="lunchStartBtn">Go to lunch</button>
+  <button id="lunchEndBtn">Back from lunch</button>
+  <br><br>
+  <button id="checkClockedInBtn">Check isClockedIn()</button>
+  <pre id="output"></pre>
+
+  <script>
+    const BREAK_RULE_ID = 1; // 15-minute break
+    const LUNCH_RULE_ID = 2; // 30-minute (mandatory) break
+
+    const USER_ID = 14;
+    const LAT = 34.4098;
+    const LNG = -118.4317;
+
+    async function sendRequest(url, payload) {
+      const output = document.getElementById('output');
+      output.textContent = 'Sending...';
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        output.textContent = JSON.stringify(await res.json(), null, 2);
+      } catch (err) {
+        output.textContent = `Error: ${err.message}`;
+      }
+    }
+
+    document.getElementById('clockInBtn').addEventListener('click', () => {
+      sendRequest('/send-clock-in', { user_id: USER_ID, lat: LAT, lng: LNG });
+    });
+
+    document.getElementById('clockOutBtn').addEventListener('click', () => {
+      sendRequest('/send-clock-out', { user_id: USER_ID, lat: LAT, lng: LNG });
+    });
+
+    document.getElementById('breakStartBtn').addEventListener('click', () => {
+      sendRequest('/send-break-start', { user_id: USER_ID, break_rule_id: BREAK_RULE_ID, lat: LAT, lng: LNG });
+    });
+
+    document.getElementById('breakEndBtn').addEventListener('click', () => {
+      sendRequest('/send-break-end', { user_id: USER_ID, lat: LAT, lng: LNG });
+    });
+
+    document.getElementById('lunchStartBtn').addEventListener('click', () => {
+      sendRequest('/send-break-start', { user_id: USER_ID, break_rule_id: LUNCH_RULE_ID, lat: LAT, lng: LNG });
+    });
+
+    document.getElementById('lunchEndBtn').addEventListener('click', () => {
+      sendRequest('/send-break-end', { user_id: USER_ID, lat: LAT, lng: LNG });
+    });
+
+    document.getElementById('checkClockedInBtn').addEventListener('click', async () => {
+      const output = document.getElementById('output');
+      output.textContent = 'Checking...';
+      try {
+        const res = await fetch('/debug-clock-status');
+        output.textContent = JSON.stringify(await res.json(), null, 2);
+      } catch (err) {
+        output.textContent = `Error: ${err.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
