@@ -1,0 +1,1 @@
+# goal-sync-attendance-automation-server
